@@ -17,15 +17,16 @@ import {
   Stethoscope,
   Mail,
   LogOut,
-  KeyRound
+  KeyRound,
+  Lock
 } from "lucide-react";
 
 export default function CIMCEnterprisePortal() {
   // Authentication State for Enterprise Portal Gateway
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [staffEmail, setStaffEmail] = useState<string>("staff@cimc.gov.ph");
+  const [staffEmail, setStaffEmail] = useState<string>("admin@cimc.gov.ph");
   const [staffPin, setStaffPin] = useState<string>("••••••••");
-  const [staffRole, setStaffRole] = useState<string>("Medical Staff / Nurse");
+  const [staffRole, setStaffRole] = useState<string>("Hospital IT Administrator");
   const [loginError, setLoginError] = useState<string>("");
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "id" | "doc" | "paging" | "status" | "about">("dashboard");
@@ -48,7 +49,7 @@ export default function CIMCEnterprisePortal() {
     e.preventDefault();
     setLoginError("");
     if (!staffEmail || !staffPin) {
-      setLoginError("Please enter your authorized CIMC email and PIN/Password.");
+      setLoginError("Please enter your email and PIN.");
       return;
     }
     setIsAuthenticated(true);
@@ -58,6 +59,8 @@ export default function CIMCEnterprisePortal() {
     setIsAuthenticated(false);
     setActiveTab("dashboard");
   };
+
+  const isITAdmin = staffRole === "Hospital IT Administrator";
 
   // If not authenticated, render secure enterprise login gate
   if (!isAuthenticated) {
@@ -87,7 +90,7 @@ export default function CIMCEnterprisePortal() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Hospital Email / ID</label>
+              <label className="text-xs font-medium text-slate-400">Hospital Email / ID (Any text accepted)</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-3 text-slate-500" />
                 <input
@@ -95,7 +98,7 @@ export default function CIMCEnterprisePortal() {
                   value={staffEmail}
                   onChange={(e) => setStaffEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors"
-                  placeholder="staff@cimc.gov.ph"
+                  placeholder="admin@cimc.gov.ph"
                 />
               </div>
             </div>
@@ -115,17 +118,17 @@ export default function CIMCEnterprisePortal() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Department Role</label>
+              <label className="text-xs font-medium text-slate-400">Department Role (Select access level)</label>
               <select
                 value={staffRole}
                 onChange={(e) => setStaffRole(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors font-medium text-teal-300"
               >
-                <option value="Medical Staff / Nurse">Medical Staff / Nurse</option>
-                <option value="Attending Physician">Attending Physician (MD)</option>
-                <option value="Hospital IT Administrator">Hospital IT Administrator</option>
-                <option value="PA Broadcast Operator">PA Broadcast Operator</option>
-                <option value="HR & Administrative">HR & Administrative Officer</option>
+                <option value="Hospital IT Administrator">Hospital IT Administrator (Full Access)</option>
+                <option value="Attending Physician">Attending Physician - DocPirma</option>
+                <option value="Medical Staff / Nurse">Medical Staff / Nurse - ID & Paging</option>
+                <option value="PA Broadcast Operator">PA Broadcast Operator - Paging Only</option>
+                <option value="HR & Administrative">HR & Administrative - Dashboard Only</option>
               </select>
             </div>
 
@@ -158,7 +161,9 @@ export default function CIMCEnterprisePortal() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-bold text-base md:text-lg tracking-tight text-slate-900">CITY OF ILAGAN MEDICAL CENTER</h1>
-              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-teal-50 text-teal-700 border border-teal-200">ENTERPRISE PORTAL</span>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-teal-50 text-teal-700 border border-teal-200">
+                {isITAdmin ? "IT ADMIN (FULL ACCESS)" : staffRole.toUpperCase()}
+              </span>
             </div>
             <p className="text-[11px] text-slate-500 font-medium tracking-wide">SALVERE OMNIBUS – GOOD HEALTH FOR ALL ILAGUEÑOS</p>
           </div>
@@ -189,7 +194,7 @@ export default function CIMCEnterprisePortal() {
 
       {/* Main Container */}
       <div className="flex flex-1 flex-col md:flex-row">
-        {/* Professional Sidebar Navigation */}
+        {/* Professional Sidebar Navigation with RBAC */}
         <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-200 bg-white p-4 flex md:flex-col gap-1.5 overflow-x-auto shrink-0 shadow-xs">
           <div className="hidden md:block px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Main Navigation
@@ -207,58 +212,67 @@ export default function CIMCEnterprisePortal() {
             <span>Dashboard Overview</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab("id")}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-              activeTab === "id"
-                ? "bg-[#0f172a] text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <Users size={18} className={activeTab === "id" ? "text-teal-400" : "text-slate-400"} />
-            <span>ID_CIMC (Badges)</span>
-          </button>
+          {/* Role-Based Navigation Items */}
+          {(isITAdmin || staffRole.includes("Nurse") || staffRole.includes("Staff")) && (
+            <button
+              onClick={() => setActiveTab("id")}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === "id"
+                  ? "bg-[#0f172a] text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <Users size={18} className={activeTab === "id" ? "text-teal-400" : "text-slate-400"} />
+              <span>ID_CIMC (Badges)</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab("doc")}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-              activeTab === "doc"
-                ? "bg-[#0f172a] text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <FileSignature size={18} className={activeTab === "doc" ? "text-teal-400" : "text-slate-400"} />
-            <span>DocPirma (Signatures)</span>
-          </button>
+          {(isITAdmin || staffRole.includes("Physician")) && (
+            <button
+              onClick={() => setActiveTab("doc")}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === "doc"
+                  ? "bg-[#0f172a] text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <FileSignature size={18} className={activeTab === "doc" ? "text-teal-400" : "text-slate-400"} />
+              <span>DocPirma (Signatures)</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => setActiveTab("paging")}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-              activeTab === "paging"
-                ? "bg-[#0f172a] text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <Tv size={18} className={activeTab === "paging" ? "text-teal-400" : "text-slate-400"} />
-            <span>Paging Work (PA)</span>
-          </button>
+          {(isITAdmin || staffRole.includes("Operator") || staffRole.includes("Nurse") || staffRole.includes("Staff")) && (
+            <button
+              onClick={() => setActiveTab("paging")}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === "paging"
+                  ? "bg-[#0f172a] text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <Tv size={18} className={activeTab === "paging" ? "text-teal-400" : "text-slate-400"} />
+              <span>Paging Work (PA)</span>
+            </button>
+          )}
 
           <div className="hidden md:block my-2 border-t border-slate-100" />
           <div className="hidden md:block px-3 py-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             System & Info
           </div>
 
-          <button
-            onClick={() => setActiveTab("status")}
-            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-              activeTab === "status"
-                ? "bg-[#0f172a] text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
-          >
-            <Server size={18} className={activeTab === "status" ? "text-teal-400" : "text-slate-400"} />
-            <span>System Status</span>
-          </button>
+          {isITAdmin && (
+            <button
+              onClick={() => setActiveTab("status")}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                activeTab === "status"
+                  ? "bg-[#0f172a] text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <Server size={18} className={activeTab === "status" ? "text-teal-400" : "text-slate-400"} />
+              <span>System Status</span>
+            </button>
+          )}
 
           <button
             onClick={() => setActiveTab("about")}
@@ -284,7 +298,7 @@ export default function CIMCEnterprisePortal() {
                 <div className="relative z-10 space-y-4">
                   <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1 text-xs font-medium text-teal-800 font-mono">
                     <span className="h-2 w-2 rounded-full bg-teal-600 animate-pulse" />
-                    AUTHORIZED SESSION ACTIVE ({staffRole})
+                    ROLE: {staffRole.toUpperCase()}
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
                     City of Ilagan Medical Center Operations Hub
@@ -308,91 +322,142 @@ export default function CIMCEnterprisePortal() {
               {/* Integrated Applications Grid */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-slate-900">Integrated Operational Systems</h3>
-                  <span className="text-xs text-slate-500 font-mono">3 Active Modules</span>
+                  <h3 className="text-lg font-bold text-slate-900">Integrated Operational Systems ({staffRole})</h3>
+                  <span className="text-xs text-slate-500 font-mono">RBAC Enforced</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* ID_CIMC Card */}
-                  <div
-                    onClick={() => setActiveTab("id")}
-                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
-                          <Users size={24} />
+                  {(isITAdmin || staffRole.includes("Nurse") || staffRole.includes("Staff")) ? (
+                    <div
+                      onClick={() => setActiveTab("id")}
+                      className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                            <Users size={24} />
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Accessible
+                          </span>
                         </div>
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Online
-                        </span>
+                        <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">ID_CIMC</h4>
+                        <p className="text-xs font-mono text-slate-400">id-cimc.vercel.app</p>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          Official hospital employee identification badge generator, preview, and verification system.
+                        </p>
                       </div>
-                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">ID_CIMC</h4>
-                      <p className="text-xs font-mono text-slate-400">id-cimc.vercel.app</p>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Official hospital employee identification badge generator, preview, and verification system.
-                      </p>
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                        <span>Launch Module</span>
+                        <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </div>
                     </div>
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
-                      <span>Launch Module</span>
-                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  ) : (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 opacity-60 flex flex-col justify-between space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="p-3 rounded-xl bg-slate-200 text-slate-500">
+                            <Lock size={24} />
+                          </div>
+                          <span className="text-xs font-medium text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">
+                            Restricted Role
+                          </span>
+                        </div>
+                        <h4 className="text-lg font-bold text-slate-700">ID_CIMC</h4>
+                        <p className="text-xs text-slate-500">Requires IT Admin, Nurse, or Staff access level.</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* DocPirma Card */}
-                  <div
-                    onClick={() => setActiveTab("doc")}
-                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="p-3 rounded-xl bg-purple-50 text-purple-700 border border-purple-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
-                          <FileSignature size={24} />
+                  {(isITAdmin || staffRole.includes("Physician")) ? (
+                    <div
+                      onClick={() => setActiveTab("doc")}
+                      className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="p-3 rounded-xl bg-purple-50 text-purple-700 border border-purple-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                            <FileSignature size={24} />
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Accessible
+                          </span>
                         </div>
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Online
-                        </span>
+                        <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">DocPirma</h4>
+                        <p className="text-xs font-mono text-slate-400">doc-pirma.vercel.app</p>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          Secure electronic signature verification and attending physician clearance portal powered by AI vision.
+                        </p>
                       </div>
-                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">DocPirma</h4>
-                      <p className="text-xs font-mono text-slate-400">doc-pirma.vercel.app</p>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Secure electronic signature verification and attending physician clearance portal powered by AI vision.
-                      </p>
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                        <span>Launch Module</span>
+                        <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </div>
                     </div>
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
-                      <span>Launch Module</span>
-                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  ) : (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 opacity-60 flex flex-col justify-between space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="p-3 rounded-xl bg-slate-200 text-slate-500">
+                            <Lock size={24} />
+                          </div>
+                          <span className="text-xs font-medium text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">
+                            Restricted Role
+                          </span>
+                        </div>
+                        <h4 className="text-lg font-bold text-slate-700">DocPirma</h4>
+                        <p className="text-xs text-slate-500">Requires Attending Physician (MD) or IT Admin access.</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Paging Work Card */}
-                  <div
-                    onClick={() => setActiveTab("paging")}
-                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
-                          <Tv size={24} />
+                  {(isITAdmin || staffRole.includes("Operator") || staffRole.includes("Nurse") || staffRole.includes("Staff")) ? (
+                    <div
+                      onClick={() => setActiveTab("paging")}
+                      className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                            <Tv size={24} />
+                          </div>
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Accessible
+                          </span>
                         </div>
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Online
-                        </span>
+                        <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">Paging Work</h4>
+                        <p className="text-xs font-mono text-slate-400">paging-work.vercel.app</p>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          Real-time hospital PA announcement broadcasting, Code Blue alerts, and bilingual text-to-speech.
+                        </p>
                       </div>
-                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">Paging Work</h4>
-                      <p className="text-xs font-mono text-slate-400">paging-work.vercel.app</p>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Real-time hospital PA announcement broadcasting, Code Blue alerts, and bilingual text-to-speech.
-                      </p>
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                        <span>Launch Module</span>
+                        <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </div>
                     </div>
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
-                      <span>Launch Module</span>
-                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  ) : (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 opacity-60 flex flex-col justify-between space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="p-3 rounded-xl bg-slate-200 text-slate-500">
+                            <Lock size={24} />
+                          </div>
+                          <span className="text-xs font-medium text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">
+                            Restricted Role
+                          </span>
+                        </div>
+                        <h4 className="text-lg font-bold text-slate-700">Paging Work</h4>
+                        <p className="text-xs text-slate-500">Requires PA Operator or IT Admin access.</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -404,7 +469,7 @@ export default function CIMCEnterprisePortal() {
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm">Enterprise Security & Access Standard</h4>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    All modules operate under strict hospital confidentiality protocols (RA 10173). Unauthorized access to medical records or system credentials is strictly prohibited and logged.
+                    Role-Based Access Control (RBAC) enforced. You are currently logged in as <strong>{staffRole}</strong> with appropriate institutional permission levels.
                   </p>
                 </div>
               </div>
