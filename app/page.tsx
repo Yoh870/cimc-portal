@@ -18,16 +18,19 @@ import {
   Mail,
   LogOut,
   KeyRound,
-  Lock
+  AlertTriangle
 } from "lucide-react";
 
 export default function CIMCEnterprisePortal() {
-  // Authentication State for Enterprise Portal Gateway
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [staffEmail, setStaffEmail] = useState<string>("admin@cimc.gov.ph");
-  const [staffPin, setStaffPin] = useState<string>("••••••••");
-  const [staffRole, setStaffRole] = useState<string>("Hospital IT Administrator");
+  const [staffEmail, setStaffEmail] = useState<string>("cimc2026");
+  const [staffPin, setStaffPin] = useState<string>("cimc2026");
   const [loginError, setLoginError] = useState<string>("");
+
+  // Anti Brute-force state
+  const [failedAttempts, setFailedAttempts] = useState<number>(0);
+  const [isLockedOut, setIsLockedOut] = useState<boolean>(false);
+  const [lockoutTimer, setLockoutTimer] = useState<number>(0);
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "id" | "doc" | "paging" | "status" | "about">("dashboard");
   const [currentTime, setCurrentTime] = useState<string>("");
@@ -45,13 +48,47 @@ export default function CIMCEnterprisePortal() {
     return () => clearInterval(timer);
   }, []);
 
+  // Lockout countdown timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLockedOut && lockoutTimer > 0) {
+      interval = setInterval(() => {
+        setLockoutTimer((prev) => {
+          if (prev <= 1) {
+            setIsLockedOut(false);
+            setFailedAttempts(0);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isLockedOut, lockoutTimer]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLockedOut) return;
+
     setLoginError("");
-    if (!staffEmail || !staffPin) {
-      setLoginError("Please enter your email and PIN.");
+
+    // Strict validation: Email/ID and Password must be cimc2026
+    if (staffEmail !== "cimc2026" || staffPin !== "cimc2026") {
+      const nextAttempts = failedAttempts + 1;
+      setFailedAttempts(nextAttempts);
+
+      if (nextAttempts >= 3) {
+        setIsLockedOut(true);
+        setLockoutTimer(30);
+        setLoginError("Too many failed login attempts. Anti-brute-force shield triggered. Locked for 30 seconds.");
+      } else {
+        setLoginError(`Invalid Credentials. Access denied. (${3 - nextAttempts} attempt(s) remaining before lockout)`);
+      }
       return;
     }
+
+    // Success
+    setFailedAttempts(0);
     setIsAuthenticated(true);
   };
 
@@ -59,8 +96,6 @@ export default function CIMCEnterprisePortal() {
     setIsAuthenticated(false);
     setActiveTab("dashboard");
   };
-
-  const isITAdmin = staffRole === "Hospital IT Administrator";
 
   // If not authenticated, render secure enterprise login gate
   if (!isAuthenticated) {
@@ -75,7 +110,7 @@ export default function CIMCEnterprisePortal() {
             </div>
             <div>
               <div className="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono bg-teal-500/10 text-teal-300 border border-teal-500/20 mb-2">
-                SECURE HOSPITAL GATEWAY
+                SECURE HOSPITAL GATEWAY (RA 10173)
               </div>
               <h1 className="text-xl font-bold tracking-tight text-white">City of Ilagan Medical Center</h1>
               <p className="text-xs text-teal-400 font-mono mt-0.5">SALVERE OMNIBUS – GOOD HEALTH FOR ALL ILAGUEÑOS</p>
@@ -84,65 +119,60 @@ export default function CIMCEnterprisePortal() {
 
           <form onSubmit={handleLogin} className="space-y-4 pt-2">
             {loginError && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 text-center font-medium">
-                {loginError}
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 text-center font-medium flex items-center justify-center gap-2">
+                <AlertTriangle size={14} className="shrink-0" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            {isLockedOut && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300 text-center font-mono">
+                🔒 Security Lockout Active: Please wait {lockoutTimer}s.
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Hospital Email / ID (Any text accepted)</label>
+              <label className="text-xs font-medium text-slate-400">Hospital ID / Access Code (cimc2026)</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-3 text-slate-500" />
                 <input
                   type="text"
                   value={staffEmail}
                   onChange={(e) => setStaffEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors"
-                  placeholder="admin@cimc.gov.ph"
+                  disabled={isLockedOut}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors disabled:opacity-50"
+                  placeholder="cimc2026"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Secure PIN / Password</label>
+              <label className="text-xs font-medium text-slate-400">Secure Password / PIN (cimc2026)</label>
               <div className="relative">
                 <KeyRound size={16} className="absolute left-3.5 top-3 text-slate-500" />
                 <input
                   type="password"
                   value={staffPin}
                   onChange={(e) => setStaffPin(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors"
-                  placeholder="••••••••"
+                  disabled={isLockedOut}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors disabled:opacity-50"
+                  placeholder="cimc2026"
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Department Role (Select access level)</label>
-              <select
-                value={staffRole}
-                onChange={(e) => setStaffRole(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors font-medium text-teal-300"
-              >
-                <option value="Hospital IT Administrator">Hospital IT Administrator (Full Access)</option>
-                <option value="Attending Physician">Attending Physician - DocPirma</option>
-                <option value="Medical Staff / Nurse">Medical Staff / Nurse - ID & Paging</option>
-                <option value="PA Broadcast Operator">PA Broadcast Operator - Paging Only</option>
-                <option value="HR & Administrative">HR & Administrative - Dashboard Only</option>
-              </select>
-            </div>
-
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-sm shadow-[0_0_20px_rgba(13,148,136,0.4)] transition-all flex items-center justify-center gap-2 mt-4"
+              disabled={isLockedOut}
+              className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white font-semibold text-sm shadow-[0_0_20px_rgba(13,148,136,0.4)] transition-all flex items-center justify-center gap-2 mt-4"
             >
               <ShieldCheck size={18} />
-              <span>Authenticate & Enter Portal</span>
+              <span>{isLockedOut ? `Locked (${lockoutTimer}s)` : "Authenticate & Enter Portal"}</span>
             </button>
           </form>
 
           <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-500 text-center font-mono space-y-1">
-            <p>Protected by Philippine Data Privacy Act (RA 10173)</p>
+            <p>Anti-Brute-Force Shield Active (Max 3 Attempts)</p>
             <p className="text-slate-600">Brgy. Lullutan, City of Ilagan, Isabela</p>
           </div>
         </div>
@@ -162,7 +192,7 @@ export default function CIMCEnterprisePortal() {
             <div className="flex items-center gap-2">
               <h1 className="font-bold text-base md:text-lg tracking-tight text-slate-900">CITY OF ILAGAN MEDICAL CENTER</h1>
               <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-teal-50 text-teal-700 border border-teal-200">
-                {isITAdmin ? "IT ADMIN (FULL ACCESS)" : staffRole.toUpperCase()}
+                AUTHORIZED STAFF
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-medium tracking-wide">SALVERE OMNIBUS – GOOD HEALTH FOR ALL ILAGUEÑOS</p>
@@ -177,12 +207,12 @@ export default function CIMCEnterprisePortal() {
 
           <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
             <div className="text-right hidden sm:block text-xs">
-              <p className="font-semibold text-slate-900">{staffEmail.split("@")[0]}</p>
-              <p className="text-[10px] text-teal-700 font-medium">{staffRole}</p>
+              <p className="font-semibold text-slate-900">CIMC Staff (cimc2026)</p>
+              <p className="text-[10px] text-teal-700 font-medium">Enterprise Full Access</p>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-600 hover:border-red-200 border border-slate-200 text-xs font-medium text-slate-700 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-600 hover:border-red-200 border border-slate-200 text-xs font-medium text-slate-700 transition-all"
               title="Lock / Logout Session"
             >
               <LogOut size={14} />
@@ -194,7 +224,7 @@ export default function CIMCEnterprisePortal() {
 
       {/* Main Container */}
       <div className="flex flex-1 flex-col md:flex-row">
-        {/* Professional Sidebar Navigation with RBAC */}
+        {/* Professional Sidebar Navigation */}
         <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-200 bg-white p-4 flex md:flex-col gap-1.5 overflow-x-auto shrink-0 shadow-xs">
           <div className="hidden md:block px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Main Navigation
@@ -212,67 +242,58 @@ export default function CIMCEnterprisePortal() {
             <span>Dashboard Overview</span>
           </button>
 
-          {/* Role-Based Navigation Items */}
-          {(isITAdmin || staffRole.includes("Nurse") || staffRole.includes("Staff")) && (
-            <button
-              onClick={() => setActiveTab("id")}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                activeTab === "id"
-                  ? "bg-[#0f172a] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <Users size={18} className={activeTab === "id" ? "text-teal-400" : "text-slate-400"} />
-              <span>ID_CIMC (Badges)</span>
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab("id")}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "id"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <Users size={18} className={activeTab === "id" ? "text-teal-400" : "text-slate-400"} />
+            <span>ID_CIMC (Badges)</span>
+          </button>
 
-          {(isITAdmin || staffRole.includes("Physician")) && (
-            <button
-              onClick={() => setActiveTab("doc")}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                activeTab === "doc"
-                  ? "bg-[#0f172a] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <FileSignature size={18} className={activeTab === "doc" ? "text-teal-400" : "text-slate-400"} />
-              <span>DocPirma (Signatures)</span>
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab("doc")}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "doc"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <FileSignature size={18} className={activeTab === "doc" ? "text-teal-400" : "text-slate-400"} />
+            <span>DocPirma (Signatures)</span>
+          </button>
 
-          {(isITAdmin || staffRole.includes("Operator") || staffRole.includes("Nurse") || staffRole.includes("Staff")) && (
-            <button
-              onClick={() => setActiveTab("paging")}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                activeTab === "paging"
-                  ? "bg-[#0f172a] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <Tv size={18} className={activeTab === "paging" ? "text-teal-400" : "text-slate-400"} />
-              <span>Paging Work (PA)</span>
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab("paging")}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "paging"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <Tv size={18} className={activeTab === "paging" ? "text-teal-400" : "text-slate-400"} />
+            <span>Paging Work (PA)</span>
+          </button>
 
           <div className="hidden md:block my-2 border-t border-slate-100" />
           <div className="hidden md:block px-3 py-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             System & Info
           </div>
 
-          {isITAdmin && (
-            <button
-              onClick={() => setActiveTab("status")}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                activeTab === "status"
-                  ? "bg-[#0f172a] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <Server size={18} className={activeTab === "status" ? "text-teal-400" : "text-slate-400"} />
-              <span>System Status</span>
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab("status")}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "status"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <Server size={18} className={activeTab === "status" ? "text-teal-400" : "text-slate-400"} />
+            <span>System Status</span>
+          </button>
 
           <button
             onClick={() => setActiveTab("about")}
@@ -298,7 +319,7 @@ export default function CIMCEnterprisePortal() {
                 <div className="relative z-10 space-y-4">
                   <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1 text-xs font-medium text-teal-800 font-mono">
                     <span className="h-2 w-2 rounded-full bg-teal-600 animate-pulse" />
-                    ROLE: {staffRole.toUpperCase()}
+                    SECURE GATEWAY: AUTHENTICATED (CIMC2026)
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
                     City of Ilagan Medical Center Operations Hub
@@ -322,142 +343,91 @@ export default function CIMCEnterprisePortal() {
               {/* Integrated Applications Grid */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-slate-900">Integrated Operational Systems ({staffRole})</h3>
-                  <span className="text-xs text-slate-500 font-mono">RBAC Enforced</span>
+                  <h3 className="text-lg font-bold text-slate-900">Integrated Operational Systems</h3>
+                  <span className="text-xs text-slate-500 font-mono">Full Access Enabled</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* ID_CIMC Card */}
-                  {(isITAdmin || staffRole.includes("Nurse") || staffRole.includes("Staff")) ? (
-                    <div
-                      onClick={() => setActiveTab("id")}
-                      className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
-                            <Users size={24} />
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            Accessible
-                          </span>
+                  <div
+                    onClick={() => setActiveTab("id")}
+                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                          <Users size={24} />
                         </div>
-                        <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">ID_CIMC</h4>
-                        <p className="text-xs font-mono text-slate-400">id-cimc.vercel.app</p>
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          Official hospital employee identification badge generator, preview, and verification system.
-                        </p>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Accessible
+                        </span>
                       </div>
-                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
-                        <span>Launch Module</span>
-                        <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                      </div>
+                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">ID_CIMC</h4>
+                      <p className="text-xs font-mono text-slate-400">id-cimc.vercel.app</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Official hospital employee identification badge generator, preview, and verification system.
+                      </p>
                     </div>
-                  ) : (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 opacity-60 flex flex-col justify-between space-y-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="p-3 rounded-xl bg-slate-200 text-slate-500">
-                            <Lock size={24} />
-                          </div>
-                          <span className="text-xs font-medium text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">
-                            Restricted Role
-                          </span>
-                        </div>
-                        <h4 className="text-lg font-bold text-slate-700">ID_CIMC</h4>
-                        <p className="text-xs text-slate-500">Requires IT Admin, Nurse, or Staff access level.</p>
-                      </div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      <span>Launch Module</span>
+                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </div>
-                  )}
+                  </div>
 
                   {/* DocPirma Card */}
-                  {(isITAdmin || staffRole.includes("Physician")) ? (
-                    <div
-                      onClick={() => setActiveTab("doc")}
-                      className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="p-3 rounded-xl bg-purple-50 text-purple-700 border border-purple-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
-                            <FileSignature size={24} />
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            Accessible
-                          </span>
+                  <div
+                    onClick={() => setActiveTab("doc")}
+                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-3 rounded-xl bg-purple-50 text-purple-700 border border-purple-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                          <FileSignature size={24} />
                         </div>
-                        <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">DocPirma</h4>
-                        <p className="text-xs font-mono text-slate-400">doc-pirma.vercel.app</p>
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          Secure electronic signature verification and attending physician clearance portal powered by AI vision.
-                        </p>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Accessible
+                        </span>
                       </div>
-                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
-                        <span>Launch Module</span>
-                        <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                      </div>
+                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">DocPirma</h4>
+                      <p className="text-xs font-mono text-slate-400">doc-pirma.vercel.app</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Secure electronic signature verification and attending physician clearance portal powered by AI vision.
+                      </p>
                     </div>
-                  ) : (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 opacity-60 flex flex-col justify-between space-y-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="p-3 rounded-xl bg-slate-200 text-slate-500">
-                            <Lock size={24} />
-                          </div>
-                          <span className="text-xs font-medium text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">
-                            Restricted Role
-                          </span>
-                        </div>
-                        <h4 className="text-lg font-bold text-slate-700">DocPirma</h4>
-                        <p className="text-xs text-slate-500">Requires Attending Physician (MD) or IT Admin access.</p>
-                      </div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      <span>Launch Module</span>
+                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </div>
-                  )}
+                  </div>
 
                   {/* Paging Work Card */}
-                  {(isITAdmin || staffRole.includes("Operator") || staffRole.includes("Nurse") || staffRole.includes("Staff")) ? (
-                    <div
-                      onClick={() => setActiveTab("paging")}
-                      className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
-                            <Tv size={24} />
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            Accessible
-                          </span>
+                  <div
+                    onClick={() => setActiveTab("paging")}
+                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                          <Tv size={24} />
                         </div>
-                        <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">Paging Work</h4>
-                        <p className="text-xs font-mono text-slate-400">paging-work.vercel.app</p>
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          Real-time hospital PA announcement broadcasting, Code Blue alerts, and bilingual text-to-speech.
-                        </p>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Accessible
+                        </span>
                       </div>
-                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
-                        <span>Launch Module</span>
-                        <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                      </div>
+                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">Paging Work</h4>
+                      <p className="text-xs font-mono text-slate-400">paging-work.vercel.app</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Real-time hospital PA announcement broadcasting, Code Blue alerts, and bilingual text-to-speech.
+                      </p>
                     </div>
-                  ) : (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 opacity-60 flex flex-col justify-between space-y-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="p-3 rounded-xl bg-slate-200 text-slate-500">
-                            <Lock size={24} />
-                          </div>
-                          <span className="text-xs font-medium text-slate-500 bg-slate-200 px-2.5 py-1 rounded-full">
-                            Restricted Role
-                          </span>
-                        </div>
-                        <h4 className="text-lg font-bold text-slate-700">Paging Work</h4>
-                        <p className="text-xs text-slate-500">Requires PA Operator or IT Admin access.</p>
-                      </div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      <span>Launch Module</span>
+                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
 
@@ -467,9 +437,9 @@ export default function CIMCEnterprisePortal() {
                   <ShieldCheck size={28} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Enterprise Security & Access Standard</h4>
+                  <h4 className="font-bold text-slate-900 text-sm">Enterprise Security & Anti-Brute-Force Shield</h4>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    Role-Based Access Control (RBAC) enforced. You are currently logged in as <strong>{staffRole}</strong> with appropriate institutional permission levels.
+                    Authentication verified against official hospital credentials (`cimc2026`). Anti-brute-force defense active against unauthorized access attempts.
                   </p>
                 </div>
               </div>
@@ -625,13 +595,13 @@ export default function CIMCEnterprisePortal() {
 
                 <div className="space-y-4 text-xs md:text-sm text-slate-600 leading-relaxed">
                   <p>
-                    The CIMC Enterprise Portal is developed and maintained by the Hospital Information Technology (IT) Department. It serves as the single point of entry for essential clinical and administrative applications.
+                    The CIMC Enterprise Portal is developed and maintained by the Hospital Information Technology (IT) Division. It serves as the single point of entry for essential clinical and administrative applications.
                   </p>
                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-slate-700">
                     <div><strong>Institution:</strong> City of Ilagan Medical Center</div>
                     <div><strong>Location:</strong> Brgy. Lullutan, City of Ilagan, Isabela, Philippines</div>
                     <div><strong>IT Department:</strong> Enterprise Systems Division</div>
-                    <div><strong>Current Session Role:</strong> {staffRole} ({staffEmail})</div>
+                    <div><strong>Authentication:</strong> Strict Access (`cimc2026`) + Anti-Brute-Force Protection</div>
                   </div>
                 </div>
               </div>
@@ -644,7 +614,7 @@ export default function CIMCEnterprisePortal() {
       <footer className="border-t border-slate-200 bg-white py-6 px-6 text-center text-xs text-slate-500 space-y-2">
         <p className="font-bold text-slate-800">CITY OF ILAGAN MEDICAL CENTER</p>
         <p className="text-teal-700 font-medium">SALVERE OMNIBUS – GOOD HEALTH FOR ALL ILAGUEÑOS</p>
-        <p className="text-[11px] text-slate-400">Brgy. Lullutan, City of Ilagan, Isabela, Philippines · Enterprise IT Portal v2.5</p>
+        <p className="text-[11px] text-slate-400">Brgy. Lullutan, City of Ilagan, Isabela, Philippines · Enterprise IT Portal v2.6</p>
       </footer>
     </div>
   );
