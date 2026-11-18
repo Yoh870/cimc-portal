@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2,
   Users,
@@ -9,38 +9,61 @@ import {
   ShieldCheck,
   Activity,
   ArrowUpRight,
-  ExternalLink
+  ExternalLink,
+  Info,
+  Server,
+  Clock,
+  MapPin,
+  Stethoscope
 } from "lucide-react";
 
-export default function CIMCPortal() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "id" | "doc" | "paging">("dashboard");
+export default function CIMCEnterprisePortal() {
+  const [activeTab, setActiveTab] = useState<"dashboard" | "id" | "doc" | "paging" | "status" | "about">("dashboard");
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleString("en-PH", {
+        dateStyle: "full",
+        timeStyle: "medium"
+      }));
+    };
+    updateDateTime();
+    const timer = setInterval(updateDateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white flex flex-col font-sans selection:bg-blue-600 selection:text-white">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#09090b]/90 backdrop-blur-xl px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab("dashboard")}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-            <Building2 size={22} className="text-white" />
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans selection:bg-teal-600 selection:text-white">
+      {/* Top Institutional Header */}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md px-6 py-3.5 flex items-center justify-between shadow-xs">
+        <div className="flex items-center gap-3.5 cursor-pointer" onClick={() => setActiveTab("dashboard")}>
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0f172a] shadow-md text-teal-400">
+            <Building2 size={24} />
           </div>
           <div>
-            <h1 className="font-bold text-lg tracking-tight">City of Ilagan Medical Center</h1>
-            <p className="text-xs text-muted-foreground text-blue-400 font-mono">CIMC ENTERPRISE INTEGRATED PORTAL (IT DEPT)</p>
+            <div className="flex items-center gap-2">
+              <h1 className="font-bold text-base md:text-lg tracking-tight text-slate-900">CITY OF ILAGAN MEDICAL CENTER</h1>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-teal-50 text-teal-700 border border-teal-200">ENTERPRISE PORTAL</span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium tracking-wide">SALVERE OMNIBUS – GOOD HEALTH FOR ALL ILAGUEÑOS</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1 text-xs text-zinc-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>ID_CIMC · DocPirma · Paging Work Connected</span>
+          <div className="hidden lg:flex items-center gap-2 text-xs text-slate-500 font-mono bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+            <Clock size={13} className="text-teal-600" />
+            <span>{currentTime}</span>
           </div>
-          <div className="flex items-center gap-2 border-l border-white/10 pl-4">
-            <div className="h-9 w-9 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-bold text-sm">
-              YG
+
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
+            <div className="h-9 w-9 rounded-full bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 font-bold text-xs">
+              IT
             </div>
             <div className="hidden md:block text-left text-xs">
-              <p className="font-semibold text-white">Yoh Gangan</p>
-              <p className="text-muted-foreground text-[10px]">IT Staff & Engineer</p>
+              <p className="font-semibold text-slate-900">CIMC IT Department</p>
+              <p className="text-[10px] text-slate-500">Authorized Personnel</p>
             </div>
           </div>
         </div>
@@ -48,17 +71,21 @@ export default function CIMCPortal() {
 
       {/* Main Container */}
       <div className="flex flex-1 flex-col md:flex-row">
-        {/* Sidebar Navigation */}
-        <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-white/10 bg-[#0c0c10] p-4 flex md:flex-col gap-2 overflow-x-auto shrink-0">
+        {/* Professional Sidebar Navigation */}
+        <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-200 bg-white p-4 flex md:flex-col gap-1.5 overflow-x-auto shrink-0 shadow-xs">
+          <div className="hidden md:block px-3 py-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+            Main Navigation
+          </div>
+
           <button
             onClick={() => setActiveTab("dashboard")}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
               activeTab === "dashboard"
-                ? "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
-                : "text-zinc-400 hover:bg-white/[0.04] hover:text-white"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            <Activity size={18} />
+            <Activity size={18} className={activeTab === "dashboard" ? "text-teal-400" : "text-slate-400"} />
             <span>Dashboard Overview</span>
           </button>
 
@@ -66,109 +93,201 @@ export default function CIMCPortal() {
             onClick={() => setActiveTab("id")}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
               activeTab === "id"
-                ? "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
-                : "text-zinc-400 hover:bg-white/[0.04] hover:text-white"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            <Users size={18} />
-            <span>ID_CIMC</span>
+            <Users size={18} className={activeTab === "id" ? "text-teal-400" : "text-slate-400"} />
+            <span>ID_CIMC (Badges)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("doc")}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
               activeTab === "doc"
-                ? "bg-purple-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
-                : "text-zinc-400 hover:bg-white/[0.04] hover:text-white"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            <FileSignature size={18} />
-            <span>DocPirma</span>
+            <FileSignature size={18} className={activeTab === "doc" ? "text-teal-400" : "text-slate-400"} />
+            <span>DocPirma (Signatures)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("paging")}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
               activeTab === "paging"
-                ? "bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-                : "text-zinc-400 hover:bg-white/[0.04] hover:text-white"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            <Tv size={18} />
-            <span>Paging Work</span>
+            <Tv size={18} className={activeTab === "paging" ? "text-teal-400" : "text-slate-400"} />
+            <span>Paging Work (PA)</span>
+          </button>
+
+          <div className="hidden md:block my-2 border-t border-slate-100" />
+          <div className="hidden md:block px-3 py-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+            System & Info
+          </div>
+
+          <button
+            onClick={() => setActiveTab("status")}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "status"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <Server size={18} className={activeTab === "status" ? "text-teal-400" : "text-slate-400"} />
+            <span>System Status</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("about")}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+              activeTab === "about"
+                ? "bg-[#0f172a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            <Info size={18} className={activeTab === "about" ? "text-teal-400" : "text-slate-400"} />
+            <span>About CIMC Portal</span>
           </button>
         </aside>
 
         {/* Content Area */}
-        <main className="flex-1 flex flex-col p-4 lg:p-6 bg-[#09090b]">
+        <main className="flex-1 flex flex-col p-6 lg:p-8 bg-[#f8fafc] overflow-y-auto">
           {/* DASHBOARD TAB */}
           {activeTab === "dashboard" && (
-            <div className="space-y-8 animate-fadeIn">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">City of Ilagan Medical Center Portal</h2>
-                <p className="text-sm text-zinc-400 mt-1">System Integration Hub by Yoh Gangan (IT Staff). Access all three core hospital systems directly inside this unified portal container without opening new tabs.</p>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div onClick={() => setActiveTab("id")} className="group cursor-pointer rounded-2xl border border-white/15 bg-gradient-to-br from-blue-950/40 via-white/[0.02] to-white/[0.02] p-6 hover:border-blue-500/50 transition-all shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/25">
-                      <Users size={24} />
-                    </div>
-                    <ArrowUpRight size={20} className="text-zinc-500 group-hover:text-white transition-colors" />
+            <div className="space-y-8 max-w-7xl mx-auto w-full animate-fadeIn">
+              {/* Institutional Welcome Card */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xs relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-teal-50/50 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 space-y-4">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1 text-xs font-medium text-teal-800 font-mono">
+                    <span className="h-2 w-2 rounded-full bg-teal-600 animate-pulse" />
+                    OFFICIAL ENTERPRISE HOSPITAL PORTAL
                   </div>
-                  <h3 className="text-lg font-bold">ID_CIMC</h3>
-                  <p className="text-xs font-mono text-blue-400 mt-0.5">https://id-cimc.vercel.app/</p>
-                  <p className="text-sm text-zinc-400 mt-2">Hospital employee identification generator and badge verification system.</p>
-                </div>
-
-                <div onClick={() => setActiveTab("doc")} className="group cursor-pointer rounded-2xl border border-white/15 bg-gradient-to-br from-purple-950/40 via-white/[0.02] to-white/[0.02] p-6 hover:border-purple-500/50 transition-all shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/25">
-                      <FileSignature size={24} />
+                  <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+                    City of Ilagan Medical Center Operations Hub
+                  </h2>
+                  <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
+                    Welcome to the centralized enterprise portal. Access core hospital administrative and operational systems securely from a single unified interface. All modules are deployed in compliance with hospital IT standards.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-500 font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin size={14} className="text-teal-600" />
+                      <span>Brgy. Lullutan, City of Ilagan, Isabela, Philippines</span>
                     </div>
-                    <ArrowUpRight size={20} className="text-zinc-500 group-hover:text-white transition-colors" />
-                  </div>
-                  <h3 className="text-lg font-bold">DocPirma</h3>
-                  <p className="text-xs font-mono text-purple-400 mt-0.5">https://doc-pirma.vercel.app/login</p>
-                  <p className="text-sm text-zinc-400 mt-2">Secure electronic document signing and medical clearance portal.</p>
-                </div>
-
-                <div onClick={() => setActiveTab("paging")} className="group cursor-pointer rounded-2xl border border-white/15 bg-gradient-to-br from-emerald-950/40 via-white/[0.02] to-white/[0.02] p-6 hover:border-emerald-500/50 transition-all shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
-                      <Tv size={24} />
+                    <div className="flex items-center gap-1.5">
+                      <Stethoscope size={14} className="text-teal-600" />
+                      <span>Tagline: Salvere Omnibus</span>
                     </div>
-                    <ArrowUpRight size={20} className="text-zinc-500 group-hover:text-white transition-colors" />
                   </div>
-                  <h3 className="text-lg font-bold">Paging Work</h3>
-                  <p className="text-xs font-mono text-emerald-400 mt-0.5">https://paging-work.vercel.app/</p>
-                  <p className="text-sm text-zinc-400 mt-2">Real-time patient queue broadcasting and counter display system.</p>
                 </div>
               </div>
 
-              {/* Integration Status Box */}
-              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
-                    <ShieldCheck size={28} />
+              {/* Integrated Applications Grid */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-slate-900">Integrated Operational Systems</h3>
+                  <span className="text-xs text-slate-500 font-mono">3 Active Modules</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* ID_CIMC Card */}
+                  <div
+                    onClick={() => setActiveTab("id")}
+                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                          <Users size={24} />
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Online
+                        </span>
+                      </div>
+                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">ID_CIMC</h4>
+                      <p className="text-xs font-mono text-slate-400">id-cimc.vercel.app</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Official hospital employee identification badge generator, preview, and verification system.
+                      </p>
+                    </div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      <span>Launch Module</span>
+                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-white">Active Production Systems Embedded</h4>
-                    <p className="text-xs text-zinc-400 mt-0.5">All applications are fully integrated into the CIMC portal interface container.</p>
+
+                  {/* DocPirma Card */}
+                  <div
+                    onClick={() => setActiveTab("doc")}
+                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-3 rounded-xl bg-purple-50 text-purple-700 border border-purple-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                          <FileSignature size={24} />
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Online
+                        </span>
+                      </div>
+                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">DocPirma</h4>
+                      <p className="text-xs font-mono text-slate-400">doc-pirma.vercel.app</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Secure electronic signature verification and attending physician clearance portal powered by AI vision.
+                      </p>
+                    </div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      <span>Launch Module</span>
+                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
+                  </div>
+
+                  {/* Paging Work Card */}
+                  <div
+                    onClick={() => setActiveTab("paging")}
+                    className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 hover:border-teal-500 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100 group-hover:bg-teal-50 group-hover:text-teal-700 transition-colors">
+                          <Tv size={24} />
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Online
+                        </span>
+                      </div>
+                      <h4 className="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors">Paging Work</h4>
+                      <p className="text-xs font-mono text-slate-400">paging-work.vercel.app</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Real-time hospital PA announcement broadcasting, Code Blue alerts, and bilingual text-to-speech.
+                      </p>
+                    </div>
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      <span>Launch Module</span>
+                      <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setActiveTab("id")} className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all">
-                    Launch ID_CIMC
-                  </button>
-                  <button onClick={() => setActiveTab("doc")} className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold transition-all">
-                    Launch DocPirma
-                  </button>
-                  <button onClick={() => setActiveTab("paging")} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all">
-                    Launch Paging
-                  </button>
+              </div>
+
+              {/* Security & Compliance Notice */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-slate-100 text-slate-700">
+                  <ShieldCheck size={28} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Enterprise Security & Access Standard</h4>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    All modules operate under strict hospital confidentiality protocols. Unauthorized access to medical records or system credentials is strictly prohibited and logged.
+                  </p>
                 </div>
               </div>
             </div>
@@ -176,27 +295,25 @@ export default function CIMCPortal() {
 
           {/* ID_CIMC EMBEDDED TAB */}
           {activeTab === "id" && (
-            <div className="flex-1 flex flex-col h-[calc(100vh-120px)] rounded-2xl border border-white/10 bg-[#121216] overflow-hidden shadow-2xl">
-              <div className="flex items-center justify-between px-4 py-3 bg-[#18181c] border-b border-white/10">
-                <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                  <span className="h-2.5 w-2.5 rounded-full bg-blue-500 animate-pulse" />
-                  <span>ID_CIMC Portal</span>
-                  <span className="text-zinc-500">|</span>
-                  <span className="text-blue-400">https://id-cimc.vercel.app/</span>
+            <div className="flex-1 flex flex-col h-[calc(100vh-130px)] rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+              <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-700">
+                  <span className="h-2.5 w-2.5 rounded-full bg-blue-600" />
+                  <span className="font-bold">ID_CIMC Employee Badge System</span>
+                  <span className="text-slate-400">|</span>
+                  <span className="text-teal-700">https://id-cimc.vercel.app/</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href="https://id-cimc.vercel.app/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-zinc-300 transition-all border border-white/10"
-                  >
-                    <span>Open in New Tab</span>
-                    <ExternalLink size={12} />
-                  </a>
-                </div>
+                <a
+                  href="https://id-cimc.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-xs text-slate-700 transition-all border border-slate-200 font-medium shadow-2xs"
+                >
+                  <span>Open in New Tab</span>
+                  <ExternalLink size={12} />
+                </a>
               </div>
-              <div className="flex-1 w-full bg-white relative">
+              <div className="flex-1 w-full bg-slate-100 relative">
                 <iframe
                   src="https://id-cimc.vercel.app/"
                   title="ID_CIMC Portal"
@@ -209,29 +326,27 @@ export default function CIMCPortal() {
 
           {/* DOCPIRMA EMBEDDED TAB */}
           {activeTab === "doc" && (
-            <div className="flex-1 flex flex-col h-[calc(100vh-120px)] rounded-2xl border border-white/10 bg-[#121216] overflow-hidden shadow-2xl">
-              <div className="flex items-center justify-between px-4 py-3 bg-[#18181c] border-b border-white/10">
-                <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                  <span className="h-2.5 w-2.5 rounded-full bg-purple-500 animate-pulse" />
-                  <span>DocPirma Login Hub</span>
-                  <span className="text-zinc-500">|</span>
-                  <span className="text-purple-400">https://doc-pirma.vercel.app/login?redirectedFrom=%2F</span>
+            <div className="flex-1 flex flex-col h-[calc(100vh-130px)] rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+              <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-700">
+                  <span className="h-2.5 w-2.5 rounded-full bg-purple-600" />
+                  <span className="font-bold">DocPirma Signature Portal</span>
+                  <span className="text-slate-400">|</span>
+                  <span className="text-teal-700">https://doc-pirma.vercel.app/login</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href="https://doc-pirma.vercel.app/login?redirectedFrom=%2F"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-zinc-300 transition-all border border-white/10"
-                  >
-                    <span>Open in New Tab</span>
-                    <ExternalLink size={12} />
-                  </a>
-                </div>
+                <a
+                  href="https://doc-pirma.vercel.app/login"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-xs text-slate-700 transition-all border border-slate-200 font-medium shadow-2xs"
+                >
+                  <span>Open in New Tab</span>
+                  <ExternalLink size={12} />
+                </a>
               </div>
-              <div className="flex-1 w-full bg-white relative">
+              <div className="flex-1 w-full bg-slate-100 relative">
                 <iframe
-                  src="https://doc-pirma.vercel.app/login?redirectedFrom=%2F"
+                  src="https://doc-pirma.vercel.app/login"
                   title="DocPirma Login"
                   className="w-full h-full border-0 absolute inset-0"
                   sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
@@ -242,27 +357,25 @@ export default function CIMCPortal() {
 
           {/* PAGING WORK EMBEDDED TAB */}
           {activeTab === "paging" && (
-            <div className="flex-1 flex flex-col h-[calc(100vh-120px)] rounded-2xl border border-white/10 bg-[#121216] overflow-hidden shadow-2xl">
-              <div className="flex items-center justify-between px-4 py-3 bg-[#18181c] border-b border-white/10">
-                <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Paging Work Queue System</span>
-                  <span className="text-zinc-500">|</span>
-                  <span className="text-emerald-400">https://paging-work.vercel.app/</span>
+            <div className="flex-1 flex flex-col h-[calc(100vh-130px)] rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+              <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-700">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
+                  <span className="font-bold">Paging Work Queue System</span>
+                  <span className="text-slate-400">|</span>
+                  <span className="text-teal-700">https://paging-work.vercel.app/</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href="https://paging-work.vercel.app/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-zinc-300 transition-all border border-white/10"
-                  >
-                    <span>Open in New Tab</span>
-                    <ExternalLink size={12} />
-                  </a>
-                </div>
+                <a
+                  href="https://paging-work.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-xs text-slate-700 transition-all border border-slate-200 font-medium shadow-2xs"
+                >
+                  <span>Open in New Tab</span>
+                  <ExternalLink size={12} />
+                </a>
               </div>
-              <div className="flex-1 w-full bg-white relative">
+              <div className="flex-1 w-full bg-slate-100 relative">
                 <iframe
                   src="https://paging-work.vercel.app/"
                   title="Paging Work Queue"
@@ -272,8 +385,83 @@ export default function CIMCPortal() {
               </div>
             </div>
           )}
+
+          {/* SYSTEM STATUS TAB */}
+          {activeTab === "status" && (
+            <div className="space-y-6 max-w-4xl mx-auto w-full animate-fadeIn">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+                <h3 className="text-lg font-bold text-slate-900">System Availability & Health Monitor</h3>
+                <p className="text-xs text-slate-600">Real-time status of integrated hospital information services.</p>
+
+                <div className="divide-y divide-slate-100 pt-2">
+                  <div className="py-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">ID_CIMC (Employee Badges)</h4>
+                      <p className="text-xs text-slate-500 font-mono">https://id-cimc.vercel.app/</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 font-mono">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      ONLINE (200 OK)
+                    </span>
+                  </div>
+
+                  <div className="py-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">DocPirma (Signature Verification)</h4>
+                      <p className="text-xs text-slate-500 font-mono">https://doc-pirma.vercel.app/</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 font-mono">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      ONLINE (200 OK)
+                    </span>
+                  </div>
+
+                  <div className="py-4 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">Paging Work (PA Broadcast)</h4>
+                      <p className="text-xs text-slate-500 font-mono">https://paging-work.vercel.app/</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 font-mono">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      ONLINE (200 OK)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ABOUT TAB */}
+          {activeTab === "about" && (
+            <div className="space-y-6 max-w-4xl mx-auto w-full animate-fadeIn">
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xs space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-slate-900">About City of Ilagan Medical Center Portal</h3>
+                  <p className="text-xs text-teal-700 font-mono">Salvere Omnibus – Good Health for All Ilagueños</p>
+                </div>
+
+                <div className="space-y-4 text-xs md:text-sm text-slate-600 leading-relaxed">
+                  <p>
+                    The CIMC Enterprise Portal is developed and maintained by the Hospital Information Technology (IT) Department. It serves as the single point of entry for essential clinical and administrative applications.
+                  </p>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-slate-700">
+                    <div><strong>Institution:</strong> City of Ilagan Medical Center</div>
+                    <div><strong>Location:</strong> Brgy. Lullutan, City of Ilagan, Isabela, Philippines</div>
+                    <div><strong>IT Department:</strong> Enterprise Systems Division</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
+
+      {/* Institutional Footer */}
+      <footer className="border-t border-slate-200 bg-white py-6 px-6 text-center text-xs text-slate-500 space-y-2">
+        <p className="font-bold text-slate-800">CITY OF ILAGAN MEDICAL CENTER</p>
+        <p className="text-teal-700 font-medium">SALVERE OMNIBUS – GOOD HEALTH FOR ALL ILAGUEÑOS</p>
+        <p className="text-[11px] text-slate-400">Brgy. Lullutan, City of Ilagan, Isabela, Philippines · Enterprise IT Portal v2.5</p>
+      </footer>
     </div>
   );
 }
