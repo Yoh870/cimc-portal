@@ -9,9 +9,7 @@ import {
   ShieldCheck,
   Activity,
   ArrowUpRight,
-  ExternalLink,
-  RefreshCw,
-  Maximize2
+  ExternalLink
 } from "lucide-react";
 
 export default function CIMCPortal() {
@@ -21,7 +19,7 @@ export default function CIMCPortal() {
     <div className="min-h-screen bg-[#09090b] text-white flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Top Navbar */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#09090b]/90 backdrop-blur-xl px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab("dashboard")}>
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.4)]">
             <Building2 size={22} className="text-white" />
           </div>
@@ -80,7 +78,7 @@ export default function CIMCPortal() {
             onClick={() => setActiveTab("doc")}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
               activeTab === "doc"
-                ? "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+                ? "bg-purple-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
                 : "text-zinc-400 hover:bg-white/[0.04] hover:text-white"
             }`}
           >
@@ -92,7 +90,7 @@ export default function CIMCPortal() {
             onClick={() => setActiveTab("paging")}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
               activeTab === "paging"
-                ? "bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+                ? "bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]"
                 : "text-zinc-400 hover:bg-white/[0.04] hover:text-white"
             }`}
           >
@@ -108,7 +106,7 @@ export default function CIMCPortal() {
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-2xl font-bold tracking-tight">City of Ilagan Medical Center Portal</h2>
-                <p className="text-sm text-zinc-400 mt-1">System Integration Hub by Yoh Gangan (IT Staff). Access all three core hospital systems directly from this unified portal without opening new tabs.</p>
+                <p className="text-sm text-zinc-400 mt-1">System Integration Hub by Yoh Gangan (IT Staff). Access all three core hospital systems directly inside this unified portal container without opening new tabs.</p>
               </div>
 
               {/* Stats Grid */}
@@ -158,7 +156,7 @@ export default function CIMCPortal() {
                   </div>
                   <div>
                     <h4 className="font-bold text-white">Active Production Systems Embedded</h4>
-                    <p className="text-xs text-zinc-400 mt-0.5">All applications are fully integrated into the CIMC portal interface.</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">All applications are fully integrated into the CIMC portal interface container.</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
