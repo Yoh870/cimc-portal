@@ -23,8 +23,8 @@ import {
 
 export default function CIMCEnterprisePortal() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [staffEmail, setStaffEmail] = useState<string>("cimc2026");
-  const [staffPin, setStaffPin] = useState<string>("cimc2026");
+  const [staffEmail, setStaffEmail] = useState<string>("");
+  const [staffPin, setStaffPin] = useState<string>("");
   const [loginError, setLoginError] = useState<string>("");
 
   // Anti Brute-force state
@@ -94,6 +94,8 @@ export default function CIMCEnterprisePortal() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setStaffEmail("");
+    setStaffPin("");
     setActiveTab("dashboard");
   };
 
@@ -132,7 +134,7 @@ export default function CIMCEnterprisePortal() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Hospital ID / Access Code (cimc2026)</label>
+              <label className="text-xs font-medium text-slate-400">Hospital ID / Access Code</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-3 text-slate-500" />
                 <input
@@ -141,13 +143,13 @@ export default function CIMCEnterprisePortal() {
                   onChange={(e) => setStaffEmail(e.target.value)}
                   disabled={isLockedOut}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors disabled:opacity-50"
-                  placeholder="cimc2026"
+                  placeholder="Enter hospital ID or access code"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Secure Password / PIN (cimc2026)</label>
+              <label className="text-xs font-medium text-slate-400">Secure Password / PIN</label>
               <div className="relative">
                 <KeyRound size={16} className="absolute left-3.5 top-3 text-slate-500" />
                 <input
@@ -156,7 +158,7 @@ export default function CIMCEnterprisePortal() {
                   onChange={(e) => setStaffPin(e.target.value)}
                   disabled={isLockedOut}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-teal-500 transition-colors disabled:opacity-50"
-                  placeholder="cimc2026"
+                  placeholder="••••••••"
                 />
               </div>
             </div>
@@ -207,7 +209,7 @@ export default function CIMCEnterprisePortal() {
 
           <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
             <div className="text-right hidden sm:block text-xs">
-              <p className="font-semibold text-slate-900">CIMC Staff (cimc2026)</p>
+              <p className="font-semibold text-slate-900">CIMC Authorized Staff</p>
               <p className="text-[10px] text-teal-700 font-medium">Enterprise Full Access</p>
             </div>
             <button
@@ -319,7 +321,7 @@ export default function CIMCEnterprisePortal() {
                 <div className="relative z-10 space-y-4">
                   <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1 text-xs font-medium text-teal-800 font-mono">
                     <span className="h-2 w-2 rounded-full bg-teal-600 animate-pulse" />
-                    SECURE GATEWAY: AUTHENTICATED (CIMC2026)
+                    SECURE GATEWAY: AUTHENTICATED
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
                     City of Ilagan Medical Center Operations Hub
@@ -439,7 +441,7 @@ export default function CIMCEnterprisePortal() {
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm">Enterprise Security & Anti-Brute-Force Shield</h4>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    Authentication verified against official hospital credentials (`cimc2026`). Anti-brute-force defense active against unauthorized access attempts.
+                    Authentication verified against official hospital database credentials. Anti-brute-force defense active against unauthorized access attempts.
                   </p>
                 </div>
               </div>
@@ -601,7 +603,7 @@ export default function CIMCEnterprisePortal() {
                     <div><strong>Institution:</strong> City of Ilagan Medical Center</div>
                     <div><strong>Location:</strong> Brgy. Lullutan, City of Ilagan, Isabela, Philippines</div>
                     <div><strong>IT Department:</strong> Enterprise Systems Division</div>
-                    <div><strong>Authentication:</strong> Strict Access (`cimc2026`) + Anti-Brute-Force Protection</div>
+                    <div><strong>Authentication:</strong> Secure Staff Gateway + Anti-Brute-Force Protection</div>
                   </div>
                 </div>
               </div>
@@ -614,7 +616,7 @@ export default function CIMCEnterprisePortal() {
       <footer className="border-t border-slate-200 bg-white py-6 px-6 text-center text-xs text-slate-500 space-y-2">
         <p className="font-bold text-slate-800">CITY OF ILAGAN MEDICAL CENTER</p>
         <p className="text-teal-700 font-medium">SALVERE OMNIBUS – GOOD HEALTH FOR ALL ILAGUEÑOS</p>
-        <p className="text-[11px] text-slate-400">Brgy. Lullutan, City of Ilagan, Isabela, Philippines · Enterprise IT Portal v2.6</p>
+        <p className="text-[11px] text-slate-400">Brgy. Lullutan, City of Ilagan, Isabela, Philippines · Enterprise IT Portal v2.7</p>
       </footer>
     </div>
   );
